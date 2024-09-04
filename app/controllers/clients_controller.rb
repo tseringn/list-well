@@ -5,7 +5,7 @@ class ClientsController < ApplicationController
   def index
     @clients = Client.all
 
-    render json: @clients
+    render json: @clients, include: :custom_fields
   end
 
   # GET /clients/1
@@ -15,9 +15,12 @@ class ClientsController < ApplicationController
 
   # POST /clients
   def create
-    @client = Client.new(client_params)
-
-    if @client.save
+    client_service = ClientService.new
+    custom_field_service = CustomFieldService.new()
+    @client = client_service.create(client_params.except(:custom_fields))
+    if @client
+      custom_fields_params = client_params[:custom_fields]||[]
+      custom_field_service.batch_find_or_create(@client[:id],custom_fields_params)
       render json: @client, status: :created, location: @client
     else
       render json: @client.errors, status: :unprocessable_entity
@@ -46,6 +49,6 @@ class ClientsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def client_params
-      params.require(:client).permit(:name)
+      params.require(:client).permit(:name,custom_fields:[:field_name,:field_type])
     end
 end

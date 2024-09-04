@@ -3,8 +3,11 @@ class LocationService
     @params =params
   end
 
-  def create () 
-    Location.create(@params)
+  def create ()
+    begin
+      Location.create!(@params)
+    rescue ActiveRecord::RecordInvalid => e
+      puts "Location creation failed: #{e.message}"
+    end
   end
-
 end

@@ -1,4 +1,4 @@
 class BuildingAttribute < ApplicationRecord
-  belongs_to :attribute
+  belongs_to :custom_field
   belongs_to :building
 end
