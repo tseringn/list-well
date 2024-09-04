@@ -27,10 +27,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_03_155929) do
     t.decimal "lot_area"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "location_id"
     t.integer "client_id"
     t.index ["client_id"], name: "index_buildings_on_client_id"
-    t.index ["location_id"], name: "index_buildings_on_location_id"
   end
 
   create_table "clients", force: :cascade do |t|
@@ -51,16 +49,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_03_155929) do
   create_table "locations", force: :cascade do |t|
     t.string "name"
     t.string "address"
-    t.string "string"
-    t.string "coordinates"
-    t.string "jsonob"
+    t.float "lat"
+    t.float "lng"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "building_id"
+    t.index ["building_id"], name: "index_locations_on_building_id"
   end
 
   add_foreign_key "building_attributes", "buildings"
   add_foreign_key "building_attributes", "custom_fields"
   add_foreign_key "buildings", "clients"
-  add_foreign_key "buildings", "locations"
   add_foreign_key "custom_fields", "clients"
+  add_foreign_key "locations", "buildings"
 end

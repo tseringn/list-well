@@ -1,12 +1,13 @@
 class BuildingAttributeService
-  def create(custom_field_id, building_id, attribute_value)
+  def create(custom_field_id, building_id, field_value)
 
-    building_attribute = BuildingAttribute.new(
+    building_attribute = BuildingAttribute.find_or_create_by(
       custom_field_id: custom_field_id,
       building_id: building_id,
-      field_value: attribute_value
+      field_value: field_value
     )
-    if building_attribute.save
+    if building_attribute.persisted?
+      puts "\n\n\n hi there"
       building_attribute
     else
       raise ActiveRecord::RecordInvalid.new(building_attribute)
@@ -17,11 +18,8 @@ class BuildingAttributeService
     success = true 
     BuildingAttribute.transaction do
       custom_fields.each do |custom_field|
-        attribute_name = custom_field[:field_name]
-        attribute_value = attributes[attribute_name] || nil
-        custom_field_id = custom_field[:id]
-        attributes.delete(attribute_name)
-        result = create(custom_field_id, building_id, attribute_value)
+        payload = prepare_create_payload(attributes,custom_field)
+        result = create(payload[:id], building_id, payload[:value])
         if result.nil?
           success = false
           raise ActiveRecord::Rollback, "Failed to create BuildingAttribute for building #{building_id}"
@@ -44,8 +42,8 @@ class BuildingAttributeService
     custom_field_id = custom_field[:id]
     attributes.delete(attribute_name)
     {
-      attribute_value: attribute_value,
-      custom_field_id: custom_field_id
+      value: attribute_value,
+      id: custom_field_id
     }
   end
 end

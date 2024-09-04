@@ -20,7 +20,7 @@ class ClientsController < ApplicationController
     @client = client_service.create(client_params.except(:custom_fields))
     if @client
       custom_fields_params = client_params[:custom_fields]||[]
-      custom_field_service.batch_find_or_create(@client[:id],custom_fields_params)
+      custom_field_service.batch_find_or_create(@client[:id], custom_fields_params)
       render json: @client, status: :created, location: @client
     else
       render json: @client.errors, status: :unprocessable_entity
