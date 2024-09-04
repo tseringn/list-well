@@ -1,8 +1,4 @@
 class CustomFieldService
-  #Create custom fields if given field is not found in the database.
-  #
-  # @param create_param [CustomField] Created custom field.
-  # @return 
   def find_or_create(field_name, field_type, client_id)
     CustomField.find_or_create_by(field_name:field_name, field_type: field_type, client_id:client_id)
   end

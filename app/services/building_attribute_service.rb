@@ -24,6 +24,7 @@ class BuildingAttributeService
       end
     end
   end
+  
   def prepare_create_payload(custom_field, attributes, building_id)
     attribute_name = custom_field[:field_name]
     attribute_value = attributes.delete(attribute_name)
