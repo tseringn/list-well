@@ -1,38 +1,51 @@
 class BuildingAttributeService
-  def create(attribute_id, building_id, attribute_value)
-    BuildingAttribute.create!(
-      attribute_id: attribute_id,
+  def create(custom_field_id, building_id, attribute_value)
+
+    building_attribute = BuildingAttribute.new(
+      custom_field_id: custom_field_id,
       building_id: building_id,
-      attribute_value: attribute_value
+      field_value: attribute_value
     )
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error("BuildingAttribute creation failed: #{e.message}")
-    false
+    if building_attribute.save
+      building_attribute
+    else
+      raise ActiveRecord::RecordInvalid.new(building_attribute)
+    end
   end
 
   def batch_create_for_building(building_id, attributes, custom_fields)
+    success = true 
     BuildingAttribute.transaction do
       custom_fields.each do |custom_field|
-        create_payload = prepare_create_payload(custom_field, attributes, building_id)
-        unless create(create_payload)
-          raise ActiveRecord::Rollback, "Failed to create BuildingAttribute for #{attribute_name}"
+        attribute_name = custom_field[:field_name]
+        attribute_value = attributes[attribute_name] || nil
+        custom_field_id = custom_field[:id]
+        attributes.delete(attribute_name)
+        result = create(custom_field_id, building_id, attribute_value)
+        if result.nil?
+          success = false
+          raise ActiveRecord::Rollback, "Failed to create BuildingAttribute for building #{building_id}"
         end
       end
-  
-      if attributes.any?
+
+      if attributes.present?
+        success = false 
         raise ActiveRecord::Rollback, "Failed to create BuildingAttributes due to presence of invalid custom field key(s): #{attributes.keys.join(', ')}"
       end
     end
+    raise StandardError, 'Failded to create building attributes' unless success 
   end
-  
-  def prepare_create_payload(custom_field, attributes, building_id)
+
+  private
+
+  def prepare_create_payload(attributes, custom_field)
     attribute_name = custom_field[:field_name]
-    attribute_value = attributes.delete(attribute_name)
+    attribute_value = attributes[attribute_name] || nil
     custom_field_id = custom_field[:id]
+    attributes.delete(attribute_name)
     {
       attribute_value: attribute_value,
-      building_id: building_id,
-      custom_field_id:custom_field_id
+      custom_field_id: custom_field_id
     }
   end
 end

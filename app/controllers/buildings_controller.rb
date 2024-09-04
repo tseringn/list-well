@@ -3,9 +3,9 @@ class BuildingsController < ApplicationController
   
     # GET /building
     def index
-      @building = Client.all
+      @building = Building.all
   
-      render json: @building, include: :custom_fields
+      render json: @building, include: :building_attributes
     end
   
     # GET /buildings/1
@@ -15,16 +15,16 @@ class BuildingsController < ApplicationController
   
     # POST /buildings
     def create
-      building_service = BuildingService.new
       custom_field_service = CustomFieldService.new()
-      @building = building_service.create(building_params.except(:attributes))
-      if @building
-        custom_fields_params = building_params[:attributes]||[]
-        custom_field_service.batch_find_or_create(@building[:id],custom_fields_params)
-        render json: @building, status: :created, location: @building
+      custom_fields = custom_field_service.find_all_by_client(building_params[:client_id])
+      building_service = BuildingService.new(custom_fields,building_params)
+      building_created = building_service.create
+      
+      if building_created
+        render json: {message: 'building created scuccesfully!'}, status: :created
       else
-        render json: @building.errors, status: :unprocessable_entity
-      end
+        render json: {message: 'create building failed'}, status: :unprocessable_entity
+      end 
     end
   
     # PATCH/PUT /building/1
@@ -49,7 +49,7 @@ class BuildingsController < ApplicationController
   
       # Only allow a list of trusted parameters through.
       def building_params
-        params.require(:building).permit(:name,:year_built, :lot_area, :client_id, attributes:[:value])
+        params.require(:building).permit(:name,:year_built, :lot_area, :client_id, attributes:{})
       end
   
 end

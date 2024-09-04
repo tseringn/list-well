@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema[7.1].define(version: 2024_09_03_155929) do
   create_table "building_attributes", force: :cascade do |t|
-    t.string "attribute_value"
+    t.string "field_value"
     t.integer "building_id"
     t.integer "custom_field_id"
     t.datetime "created_at", null: false
