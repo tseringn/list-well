@@ -24,7 +24,7 @@ class BuildingAttribute < ApplicationRecord
         errors.add(:field_value, "must be a number")
       end
     when 'enum_type'
-      unless field_value.is_a?(Integer)
+      unless valid_integer?(field_value)
         errors.add(:field_value, "must be an integer")
       end
     end
@@ -32,5 +32,9 @@ class BuildingAttribute < ApplicationRecord
 
   def valid_float?(value)
     true if Float(value) rescue false
+  end
+
+  def valid_integer?(value)
+    true if Integer(value) rescue false
   end
 end

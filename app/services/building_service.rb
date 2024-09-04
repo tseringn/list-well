@@ -9,7 +9,7 @@ class BuildingService
     location_service = LocationService.new
     success = true
     Building.transaction do
-      building = Building.new(@building_params.except(:attributes)) 
+      building = Building.new(@building_params.except(:attributes,:location)) 
       
       if building.save
         attributes_params = @building_params[:attributes] || {}
@@ -41,7 +41,44 @@ class BuildingService
     Rails.logger.error("Transaction failed: #{e.message}")
     false
   end
-  def update(id)
 
+  def update(id)
+    building_attribute_service = BuildingAttributeService.new
+    location_service = LocationService.new
+    success = true
+    Building.transaction do
+      building = Building.find(id)
+      building.assign_attributes(@building_params.except(:attributes,:location))
+      
+      if building.save
+        attributes_params = @building_params[:attributes] || {}
+        location_params = @building_params[:location] 
+        begin
+          building_attribute_service.batch_update_for_building( 
+            building.id,
+            attributes_params,
+            @custom_fields,
+            attributes_params[:id]
+            )
+          next if location_params.nil?
+          location_params[:building_id] = building[:id]
+          location_service.update(location_params)    
+        rescue => e
+          success = false 
+          Rails.logger.error("Transaction failed: #{e.message}")
+          raise ActiveRecord::Rollback
+        end
+
+      else
+        success = false
+        Rails.logger.error("Couldn't update building")
+        raise ActiveRecord::Rollback, "Building could not be udpated"
+      end
+    end
+
+    success 
+  rescue => e
+    Rails.logger.error("Transaction failed: #{e.message}")
+    false
   end 
 end

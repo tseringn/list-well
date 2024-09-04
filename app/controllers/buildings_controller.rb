@@ -1,5 +1,5 @@
 class BuildingsController < ApplicationController
-    before_action :set_client, only: %i[ show update destroy ]
+    before_action :set_building, only: %i[ show update destroy ]
   
     # GET /building
     def index
@@ -29,10 +29,14 @@ class BuildingsController < ApplicationController
   
     # PATCH/PUT /building/1
     def update
-      if @building.update(building_params)
-        render json: @building
+      custom_field_service = CustomFieldService.new()
+      custom_fields = custom_field_service.find_all_by_client(building_params[:client_id])
+      building_service = BuildingService.new(custom_fields, building_params)
+      building_updated = building_service.update(params[:id])
+      if building_updated 
+        render json: {message: 'building updated scuccesfully!'}, status: :ok
       else
-        render json: @building.errors, status: :unprocessable_entity
+        render json: {message: 'update building failed'}, status: :unprocessable_entity
       end
     end
   
