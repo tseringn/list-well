@@ -16,7 +16,7 @@ class BuildingAttribute < ApplicationRecord
     return if self.field_value.nil?
     case custom_field.field_type
     when 'freeform_type'
-      unless field_value.is_a?(String)
+      if valid_integer?(field_value) || valid_float?(field_value)
         errors.add(:field_value, "must be a string")
       end
     when 'number_type'

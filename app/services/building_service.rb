@@ -17,7 +17,7 @@ class BuildingService
         begin
           building_attribute_service.batch_create_for_building( 
             building.id,
-            attributes
+            attributes,
             @custom_fields
             )
           next if location_params.nil?
@@ -25,20 +25,18 @@ class BuildingService
           location_service.create(location_params)    
         rescue => e
           success = false 
-          Rails.logger.error("Transaction failed: #{e.message}")
-          raise ActiveRecord::Rollback
+          raise ActiveRecord::Rollback, "Transaction failed: #{e.message}"
         end
 
       else
         success = false
-        Rails.logger.error("Couldn't save building")
         raise ActiveRecord::Rollback, "Building could not be saved"
       end
     end
 
     success 
   rescue => e
-    Rails.logger.error("Transaction failed: #{e.message}")
+    raise StandardError, "Transaction failed: #{e.message}"
     false
   end
 
@@ -64,20 +62,18 @@ class BuildingService
           location_service.update(location_params)    
         rescue => e
           success = false 
-          Rails.logger.error("Transaction failed: #{e.message}")
-          raise ActiveRecord::Rollback
+          raise ActiveRecord::Rollback,"Transaction failed: #{e.message}"
         end
 
       else
         success = false
-        Rails.logger.error("Couldn't update building")
         raise ActiveRecord::Rollback, "Building could not be udpated"
       end
     end
 
     success 
   rescue => e
-    Rails.logger.error("Transaction failed: #{e.message}")
+    raise StandardError, "Transaction failed: #{e.message}"
     false
   end 
 end
