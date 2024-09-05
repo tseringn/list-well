@@ -12,12 +12,12 @@ class BuildingService
       building = Building.new(@building_params.except(:attributes,:location)) 
       
       if building.save
-        attributes_params = @building_params[:attributes] || {}
+        attributes = @building_params[:attributes] || []
         location_params = @building_params[:location] 
         begin
           building_attribute_service.batch_create_for_building( 
             building.id,
-            attributes_params,
+            attributes
             @custom_fields
             )
           next if location_params.nil?
@@ -51,14 +51,13 @@ class BuildingService
       building.assign_attributes(@building_params.except(:attributes,:location))
       
       if building.save
-        attributes_params = @building_params[:attributes] || {}
+        attributes = @building_params[:attributes] || []
         location_params = @building_params[:location] 
         begin
           building_attribute_service.batch_update_for_building( 
             building.id,
-            attributes_params,
+            attributes,
             @custom_fields,
-            attributes_params[:id]
             )
           next if location_params.nil?
           location_params[:building_id] = building[:id]

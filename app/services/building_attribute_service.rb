@@ -28,8 +28,10 @@ class BuildingAttributeService
     success = true 
     BuildingAttribute.transaction do
       custom_fields.each do |custom_field|
-        payload = prepare_create_payload(attributes,custom_field)
-        result = create(payload[:id], building_id, payload[:value])
+        payload = prepare_upsert_payload(attributes, custom_field)
+        payload[:building_id] = building_id
+        result = create(payload)
+        
         if result.nil?
           success = false
           raise ActiveRecord::Rollback, "Failed to create BuildingAttribute for building #{building_id}"
@@ -44,22 +46,14 @@ class BuildingAttributeService
     raise StandardError, 'Failded to create building attributes' unless success 
   end
 
-  def batch_update_for_building(building_id, attributes, custom_fields, id)
+  def batch_update_for_building(building_id, attributes, custom_fields)
     success = true 
     BuildingAttribute.transaction do
       custom_fields.each do |custom_field|
-
-        payload = prepare_update_payload(attributes, custom_field)
+        payload = prepare_upsert_payload(attributes, custom_field, true)
         next if payload.nil?
-
-        puts custom_field.field_name
-        result = update(
-          id: id, 
-          custom_field_id: payload[:id], 
-          building_id: building_id, 
-          field_value: payload[:value]
-          )
-
+        payload[:building_id] = building_id
+        result = update(payload)
         if result.nil?
           puts "how did a get here?"
           puts "\n\n\n"
@@ -68,7 +62,7 @@ class BuildingAttributeService
         end
       end
 
-      if attributes.present?
+      unless attributes.empty?
         puts "how did a get here"
         puts "\n\n\n"
         puts attributes
@@ -92,19 +86,19 @@ class BuildingAttributeService
     }
   end
 
-  def prepare_update_payload(attributes, custom_field)
+  def prepare_upsert_payload(attributes, custom_field, update_mode=false)
+
     attribute_name = custom_field[:field_name]
-    unless attributes.has_key?(attribute_name)
-      puts "\n\n where?? \n\n"
-      return nil
+
+    target_attribute = attributes.find do | attribute |
+      attribute.has_key?(attribute_name)
     end
-    puts " got here too \n"
-    attribute_value = attributes[attribute_name] || nil
-    custom_field_id = custom_field[:id]
-    attributes.delete(attribute_name)
-    {
-      value: attribute_value,
-      id: custom_field_id
-    }
+
+    return nil if target_attribute.nil? && update_mode
+
+    target[attribute_name] = nil if target_attribute.nil?
+    target[:custom_field_id] = custom_field[:id]
+    attributes.delete(target)
+    target
   end
 end
