@@ -64,6 +64,14 @@ class BuildingAttributeService
     raise StandardError, 'Failded to update building attributes' unless success 
   end
 
+  def get_mapped_attributes_custom_fields(building_attributes)
+    attributes = {}
+    building_attributes.each do |attribute|
+      attributes[attribute.custom_field.field_name]= attribute.field_value
+    end
+    attributes
+  end
+
   private
 
   def prepare_upsert_payload(attributes, custom_field, update_mode=false)
@@ -85,7 +93,7 @@ class BuildingAttributeService
     target_attribute[:custom_field_id] = custom_field[:id]
     return target_attribute
   end
-  
+
   def get_attributes_keys(attributes)
     attributes.map do |attribute|
       attribute.keys.detect do |key|
@@ -93,4 +101,5 @@ class BuildingAttributeService
       end
     end
   end
+
 end

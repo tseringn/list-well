@@ -75,5 +75,5 @@ class BuildingService
   rescue => e
     raise StandardError, "Transaction failed: #{e.message}"
     false
-  end 
+  end
 end
