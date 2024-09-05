@@ -41,6 +41,7 @@ This is List Well, it allows clients to submit buildings they own and make updat
 - **Backend**: Ruby on Rails
 - **Database**: SQLite
 - **Data Seeding**: Faker for generating mock data.
+- **Client Simulation**: Postman for making RESTful API calls.
 
 ## Setup
 
