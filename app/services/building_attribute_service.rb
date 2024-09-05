@@ -85,6 +85,7 @@ class BuildingAttributeService
     target_attribute[:custom_field_id] = custom_field[:id]
     return target_attribute
   end
+  
   def get_attributes_keys(attributes)
     attributes.map do |attribute|
       attribute.keys.detect do |key|

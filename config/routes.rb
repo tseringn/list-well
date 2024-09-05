@@ -1,8 +1,5 @@
 Rails.application.routes.draw do
-  resources :attributes
   resources :buildings
-  resources :building_attributes
-  resources :locations
   resources :clients
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

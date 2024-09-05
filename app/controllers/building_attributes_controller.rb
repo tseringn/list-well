@@ -1,2 +1,0 @@
-class BuildingAttributesController < ApplicationController
-end
