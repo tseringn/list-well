@@ -1,7 +1,5 @@
 class BuildingAttributeService
   def create(create_params)
-    puts "\n\n\n"
-    puts create_params
     building_attribute = BuildingAttribute.find_or_create_by(create_params)
     if building_attribute.persisted?
       building_attribute
@@ -57,7 +55,6 @@ class BuildingAttributeService
           raise ActiveRecord::Rollback, "Failed to update BuildingAttribute for building #{building_id}"
         end
       end
-      puts attributes.length
       unless attributes.empty?
         success = false 
         joined_keys = get_attributes_keys(attributes).join(", ")
